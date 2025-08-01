@@ -1,0 +1,40 @@
+name: Build Qt Project
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        tools: 'tools_qtcreator,qt.tools.qtcreator'
+        cache: true
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Build
+      run: |
+        qmake SolutionControl.pro
+        nmake
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: SolutionControl
+        path: release/*.exe
